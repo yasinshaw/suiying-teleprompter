@@ -378,7 +378,7 @@
   var scriptNorm = [];    // 规范化后的字符数组
   var spans = [];
   var lastHiIdx = -1;
-  var rec = null, listening = false, failCount = 0;
+  var rec = null, listening = false, failCount = 0, restartDelay = 150;
   var pipWin = null;
   // ---------- 存储层：服务器=唯一数据源，所有设备共享同一份稿件库 ----------
   var db = { library: [], currentLibId: null };
@@ -596,17 +596,30 @@
       $('echo').classList.add('show');
       tryAlign(cand);
     };
+    rec.onstart = function () { restartDelay = 150; };
     rec.onend = function () {
-      if (listening) { setTimeout(function () { try { rec && rec.start(); } catch (e) {} }, 150); }
+      if (!listening) return;
+      // Chrome 会周期性强制断开；带退避自动重启，避免 network 错误时疯狂重试
+      setTimeout(function () {
+        if (!listening || !rec) return;
+        try { rec.start(); } catch (e) {}
+      }, restartDelay);
+      restartDelay = Math.min(2000, restartDelay * 2);
     };
     rec.onerror = function (e) {
-      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-        toast('麦克风权限被拒绝，请在浏览器地址栏允许麦克风');
-        stopAll();
-      } else if (e.error === 'audio-capture') {
-        toast('找不到麦克风设备');
-        stopAll();
+      var msgs = {
+        'not-allowed': '麦克风权限被拒绝，请在地址栏重新允许',
+        'audio-capture': '找不到麦克风设备',
+        'network': '语音服务网络错误（检查代理/网络后点停止再开始）',
+        'service-not-allowed': '语音服务被系统拒绝'
+      };
+      var msg = msgs[e.error];
+      if (msg) {
+        setStatus('⚠️ ' + msg);
+        toast('⚠️ ' + msg);
+        if (e.error === 'not-allowed' || e.error === 'audio-capture') stopAll();
       }
+      // no-speech / aborted 静默，由 onend 自动重启接管
     };
     rec.start();
     listening = true;
@@ -617,10 +630,11 @@
   function tryAlign(cand) {
     var N = scriptNorm.length;
     if (!N || cand.length < 5) return;
-    var tailLen = Math.min(20, cand.length);
-    var tail = cand.slice(-tailLen);
     var best = -1, bestScore = 0;
-    function scan(from, to) {
+    // 多尺度滑窗：长窗稳、短窗抗识别残缺（技术词/英文名多的稿子尤需短窗）
+    var lens = cand.length >= 20 ? [20, 12, 8] : (cand.length >= 12 ? [12, 8] : [Math.min(8, cand.length)]);
+    function scan(tailLen, from, to) {
+      var tail = cand.slice(-tailLen);
       for (var i = from; i + tailLen <= N && i <= to; i++) {
         var m = 0;
         for (var j = 0; j < tailLen; j++) {
@@ -630,11 +644,12 @@
         if (s > bestScore) { bestScore = s; best = i + tailLen; }
       }
     }
-    // 先在当前位置附近找，命中率低就全局回退（念快了/识别偏差大也能追上）
-    scan(Math.max(0, state.pos - 80), N - tailLen);
+    var from = Math.max(0, state.pos - 80), to = N - 1;
+    for (var li = 0; li < lens.length; li++) scan(lens[li], from, to);
+    // 就近窗全失败 → 全局回退（跳读/换说法）
     if (bestScore < 0.45) {
       best = -1; bestScore = 0;
-      scan(0, N - tailLen);
+      for (var gj = 0; gj < lens.length; gj++) scan(lens[gj], 0, N - 1);
     }
     if (best >= 0 && bestScore >= 0.45 && best >= state.pos - 5) {
       if (best !== state.pos) {
@@ -646,9 +661,9 @@
       }
       // 保险：后台标签页 rAF 可能被节流冻结，收到语音就踢活主循环
       if (!state.playing && !listening) window.requestAnimationFrame(tick);
-    } else if (best < 0) {
-      // 彻底没匹配上：提示但不清位置，用户继续念，下轮识别流变长后会自动接上
-      if (++failCount === 12) toast('暂时没跟上演示稿，继续念通常会自动接上；或直接点正文手动定位');
+    } else {
+      failCount++;
+      if (failCount === 12) toast('暂时没跟上演示稿，继续念通常会自动接上；或直接点正文手动定位');
     }
   }
 

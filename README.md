@@ -61,6 +61,12 @@ bash install.sh
 > ```
 >
 > iPad/iPhone 信任证书（一次性）：Safari 打开 `http://<IP>:8899/ca.pem` 下载描述文件 → 设置→已下载的描述文件→安装 → 设置→通用→关于本机→证书信任设置→给对应 CA 开启完全信任 → 访问 `https://<IP>:8443`，语音跟随便用。
+>
+> **Mac 本机也提示"不安全"？** 把 CA 装进钥匙串即可（免 sudo，Chrome/Safari 通用）：
+>
+> ```bash
+> security add-trusted-cert -r trustRoot -k ~/Library/Keychains/login.keychain-db ca.pem
+> ```
 
 ## 🗂 数据存储
 

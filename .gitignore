@@ -1,0 +1,6 @@
+.library.json
+.sync.json
+*.tmp
+.library.json.tmp
+ai.yasin.teleprompter.plist
+.DS_Store

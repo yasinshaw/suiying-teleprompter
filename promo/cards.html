@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { margin:0; background:#0b0b0e; color:#f5f5f7; font-family:"PingFang SC","Hiragino Sans GB",sans-serif;
+         display:flex; align-items:center; justify-content:center; height:100vh; }
+  .wrap { text-align:center; }
+  .small { font-size:44px; color:#8b8b96; margin-bottom:28px; letter-spacing:6px; }
+  .big { font-size:120px; font-weight:800; letter-spacing:8px; line-height:1.35; }
+  .accent { color:#ffd60a; }
+  .url { margin-top:70px; font-size:40px; color:#0a84ff; font-weight:600; letter-spacing:2px; }
+  .slogan { margin-top:26px; font-size:34px; color:#8b8b96; letter-spacing:4px; }
+  .logo { font-size:56px; font-weight:800; letter-spacing:6px; margin-bottom:60px; }
+  .badge { display:inline-block; margin-top:50px; padding:10px 28px; border:1px solid #2a2a33;
+           border-radius:999px; color:#8b8b96; font-size:24px; letter-spacing:3px; }
+</style>
+</head>
+<body>
+  <div class="wrap" id="card"></div>
+<script>
+  const params = new URLSearchParams(location.search);
+  const type = params.get('t') || 'hook';
+  const el = document.getElementById('card');
+  if (type === 'hook') {
+    el.innerHTML = `<div class="small">录 口 播 最 怕 什 么 ？</div>
+                    <div class="big">忘<span class="accent">词</span>。</div>`;
+  } else if (type === 'pain') {
+    el.innerHTML = `<div class="small">低头看稿，眼神飘了</div>
+                    <div class="big">提词器 App<span class="accent">还要订阅</span></div>`;
+  } else if (type === 'end') {
+    el.innerHTML = `<div class="logo">🎬 叶哥提词器</div>
+                    <div class="big" style="font-size:72px">让台词<span class="accent">追着</span>你走</div>
+                    <div class="url">github.com/yasinshaw/yege-teleprompter</div>
+                    <div class="slogan">免费 · 开源 · 数据在你自己的电脑上</div>`;
+  } else if (type === 'https') {
+    el.innerHTML = `<div class="small">iPad / 手机</div>
+                    <div class="big" style="font-size:84px">语音跟随<span class="accent">随便用</span></div>
+                    <div class="badge">一次性证书 · 局域网直连 · 不出公网</div>`;
+  }
+</script>
+</body>
+</html>

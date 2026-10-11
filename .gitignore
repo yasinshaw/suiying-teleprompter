@@ -12,3 +12,8 @@ ca.key
 *.csr
 *.srl
 san.ext
+# 宣传素材本地目录(视频/帧/音频不入库)
+promo/frames/
+promo/out/
+promo/voiceover.mp3
+promo/*.mp4

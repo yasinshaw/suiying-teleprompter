@@ -63,7 +63,9 @@ class H(BaseHTTPRequestHandler):
             self._send(200, json.dumps(load_db(), ensure_ascii=False).encode("utf-8"),
                        "application/json; charset=utf-8")
         elif path == "/info":
-            self._send(200, json.dumps({"ip": lan_ip(), "port": 8899}).encode(), "application/json")
+            has_https = os.path.exists(os.path.join(ROOT, "cert.pem")) and os.path.exists(os.path.join(ROOT, "key.pem"))
+            self._send(200, json.dumps({"ip": lan_ip(), "port": 8899, "https": has_https, "https_port": 8443}).encode(),
+                       "application/json")
         elif path == "/ca.pem":
             ca = os.path.join(ROOT, "ca.pem")
             if os.path.exists(ca):

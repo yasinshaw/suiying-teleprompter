@@ -169,11 +169,12 @@
 
   /* ===== 地址条（桌面常显，给手机/iPad 连接用）===== */
   #addrBar {
-    display: none; align-items: center; gap: 8px; flex-wrap: wrap;
+    display: none; flex-direction: column; gap: 4px; flex-wrap: wrap;
     padding: 6px 14px; background: #101015; border-bottom: 1px solid var(--border);
     font-size: 12px; color: var(--dim); flex-shrink: 0;
   }
   #addrBar.show { display: flex; }
+  .addrRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   #addrBar .addrText { color: var(--accent2); font-weight: 600; user-select: all; }
   #addrBar .tbtn { padding: 4px 10px; font-size: 12px; }
   @media (max-width: 760px) { #addrBar.show { display: none; } }
@@ -261,10 +262,17 @@
     <span id="statusText"></span>
   </div>
   <div id="addrBar">
-    <span>📱 手机 / iPad 打开：</span>
-    <span class="addrText" id="addrText"></span>
-    <button class="tbtn" id="addrCopyBtn">📋 复制</button>
-    <button class="tbtn" id="addrQrBtn">🔳 二维码</button>
+    <div class="addrRow">
+      <span>📱 通用地址（匀速滚动）：</span>
+      <span class="addrText" id="addrText"></span>
+      <button class="tbtn" id="addrCopyBtn">📋 复制</button>
+      <button class="tbtn" id="addrQrBtn">🔳 二维码</button>
+    </div>
+    <div class="addrRow" id="addrHttpsRow" style="display:none">
+      <span>🎙️ 语音跟随（iOS 需先装证书）：</span>
+      <span class="addrText" id="addrTextHttps"></span>
+      <button class="tbtn" id="addrCopyHttpsBtn">📋 复制</button>
+    </div>
   </div>
 
   <div id="main">
@@ -851,17 +859,25 @@
     try { document.execCommand('copy'); done(); } catch (e) { toast('复制失败，请手动选择地址复制'); }
     document.body.removeChild(ta);
   }
-  var lanURL = '';
+  var lanURL = '', lanURLHttps = '';
   function initAddrBar() {
     if (!window.location.protocol.startsWith('http')) return; // file:// 无同步，不显示
     fetch('/info').then(function (r) { return r.json(); }).then(function (info) {
       lanURL = 'http://' + info.ip + ':' + info.port + '/';
       $('addrText').textContent = lanURL;
       $('addrBar').classList.add('show');
+      if (info.https) {
+        lanURLHttps = 'https://' + info.ip + ':' + info.https_port + '/';
+        $('addrTextHttps').textContent = lanURLHttps;
+        $('addrHttpsRow').style.display = 'flex';
+      }
     }).catch(function () {});
   }
   $('addrCopyBtn').onclick = function () {
-    if (lanURL) copyText(lanURL, '✅ 地址已复制：' + lanURL);
+    if (lanURL) copyText(lanURL, '✅ 已复制通用地址：' + lanURL);
+  };
+  $('addrCopyHttpsBtn').onclick = function () {
+    if (lanURLHttps) copyText(lanURLHttps, '✅ 已复制语音跟随地址：' + lanURLHttps);
   };
   $('addrQrBtn').onclick = function () {
     if (!lanURL) return;

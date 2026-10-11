@@ -1,5 +1,5 @@
 #!/bin/bash
-# 随影提词器 - 一键安装 launchd 常驻服务（macOS）
+# 叶哥提词器 - 一键安装 launchd 常驻服务（macOS）
 # 用法: bash install.sh
 set -e
 

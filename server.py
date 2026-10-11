@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""随影提词器本地服务：静态页面 + 稿件库存储（服务器=唯一数据源，所有设备读写同一份）"""
+"""叶哥提词器本地服务：静态页面 + 稿件库存储（服务器=唯一数据源，所有设备读写同一份）"""
 import json, os, socket, threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 

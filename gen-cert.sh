@@ -1,9 +1,9 @@
 #!/bin/bash
-# 随影提词器 - 生成局域网 HTTPS 自签证书（解锁 iPad/iPhone 语音跟随）
+# 叶哥提词器 - 生成局域网 HTTPS 自签证书（解锁 iPad/iPhone 语音跟随）
 # 用法: bash gen-cert.sh 192.168.31.119   （换成你自己的局域网 IP）
 set -e
 IP="${1:?用法: bash gen-cert.sh <你的局域网IP>，在macOS上运行 ifconfig | grep inet 查看}"
-CA_SUBJ="${2:-Suiying Dev CA}"
+CA_SUBJ="${2:-Yege Dev CA}"
 
 openssl req -x509 -new -nodes -keyout ca.key -sha256 -days 3650 -subj "/CN=$CA_SUBJ" -out ca.pem
 openssl req -new -nodes -keyout key.pem -subj "/CN=$IP" -out server.csr

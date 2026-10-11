@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b0b0e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>随影提词器 · 语音跟随</title>
+<title>叶哥提词器 · 语音跟随</title>
 <style>
   :root {
     --bg: #0b0b0e;
@@ -249,7 +249,7 @@
 <body>
 <div id="app">
   <div id="topbar">
-    <span class="logo">🎬 随影提词器</span>
+    <span class="logo">🎬 叶哥提词器</span>
     <div class="seg">
       <button id="modeSpeed" class="active">匀速滚动</button>
       <button id="modeVoice">语音跟随 <span id="micDot"></span></button>
@@ -1090,7 +1090,7 @@
   setStatus(SR ? '就绪 · 推荐Chrome' : '⚠️ 语音跟随需Chrome；匀速模式可用');
   // 移动端首次使用提示
   if (!localStorage.getItem('tg_state') && window.innerWidth <= 760) {
-    toast('📱 欢迎使用随影提词器！先点「📝 稿件」粘贴你的口播稿');
+    toast('📱 欢迎使用叶哥提词器！先点「📝 稿件」粘贴你的口播稿');
   }
   // 小屏默认收起编辑面板（它在小屏是覆盖层，不能盖住提词画面）
   if (window.innerWidth <= 760) $('editorPane').classList.add('hidden');

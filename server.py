@@ -64,6 +64,13 @@ class H(BaseHTTPRequestHandler):
                        "application/json; charset=utf-8")
         elif path == "/info":
             self._send(200, json.dumps({"ip": lan_ip(), "port": 8899}).encode(), "application/json")
+        elif path == "/ca.pem":
+            ca = os.path.join(ROOT, "ca.pem")
+            if os.path.exists(ca):
+                with open(ca, "rb") as f:
+                    self._send(200, f.read(), "application/x-x509-ca-cert")
+            else:
+                self._send(404, b"no CA generated; run gen-cert.sh")
         elif path in ("/", "/index.html"):
             with open(os.path.join(ROOT, "index.html"), "rb") as f:
                 self._send(200, f.read())
@@ -89,5 +96,27 @@ class H(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print("teleprompter serving on http://%s:8899 (LAN reachable)" % lan_ip(), flush=True)
-    ThreadingHTTPServer(("0.0.0.0", 8899), H).serve_forever()
+    # HTTP 8899 照常服务；若存在证书则额外开 HTTPS 8443
+    # （iPad/iPhone 语音跟随需要 HTTPS——局域网 HTTP 属非安全上下文，浏览器不给语音识别 API）
+    import threading
+
+    def serve(httpd):
+        httpd.serve_forever()
+
+    httpd = ThreadingHTTPServer(("0.0.0.0", 8899), H)
+    threading.Thread(target=serve, args=(httpd,), daemon=True).start()
+    print("HTTP  serving on port 8899", flush=True)
+
+    cert, key = os.path.join(ROOT, "cert.pem"), os.path.join(ROOT, "key.pem")
+    if os.path.exists(cert) and os.path.exists(key):
+        import ssl
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ctx.load_cert_chain(cert, key)
+        httpsd = ThreadingHTTPServer(("0.0.0.0", 8443), H)
+        httpsd.socket = ctx.wrap_socket(httpsd.socket, server_side=True)
+        print("HTTPS serving on port 8443 (iOS 语音跟随已解锁: https://%s:8443)" % lan_ip(), flush=True)
+        httpsd.serve_forever()
+    else:
+        print("tip: bash gen-cert.sh <局域网IP> 可开启 HTTPS（iPad/iPhone 语音跟随需要）", flush=True)
+        print("teleprompter serving on http://%s:8899 (LAN reachable)" % lan_ip(), flush=True)
+        httpd.serve_forever()  # 主线程守HTTP，进程不退出

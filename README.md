@@ -51,7 +51,14 @@ bash install.sh
 | iPad / 手机浏览器 | ⚠️ 需 HTTPS | ✅ | ✅ |
 | file:// 直开 | ✅(桌面) | ✅ | ❌ |
 
-> iOS 语音跟随限制：浏览器要求 HTTPS 才授予语音识别权限，纯 HTTP 局域网开不了。可用 Cloudflare Tunnel 等给本机套免费 HTTPS 解决；或移动端直接用匀速模式。
+> iOS 语音跟随限制：浏览器要求 HTTPS 才授予语音识别权限，纯 HTTP 局域网开不了。解决方案（自签证书，数据不出局域网）：
+>
+> ```bash
+> bash gen-cert.sh 192.168.31.119   # 换成你的局域网IP（ifconfig | grep inet 查看）
+> python3 server.py                  # 检测到证书后自动额外开启 https://<IP>:8443
+> ```
+>
+> iPad/iPhone 信任证书（一次性）：Safari 打开 `http://<IP>:8899/ca.pem` 下载描述文件 → 设置→已下载的描述文件→安装 → 设置→通用→关于本机→证书信任设置→给 Suiying Dev CA 开启完全信任 → 访问 `https://<IP>:8443`，语音跟随便用。
 
 ## 🗂 数据存储
 

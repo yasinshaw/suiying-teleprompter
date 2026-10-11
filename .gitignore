@@ -4,3 +4,11 @@
 .library.json.tmp
 ai.yasin.teleprompter.plist
 .DS_Store
+# 证书/私钥绝不入库
+cert.pem
+key.pem
+ca.pem
+ca.key
+*.csr
+*.srl
+san.ext
